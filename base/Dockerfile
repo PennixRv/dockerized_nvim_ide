@@ -42,12 +42,12 @@ RUN nvim --headless "+Lazy! sync" +"sleep 15" +qa
 
 RUN nvim --headless +AstroUpdatePackages +qa
 
-RUN nvim --headless +"LspInstall    asm-lsp bash-language-server bzl cmake-language-server                  \
+RUN nvim --headless +"MasonInstall  asm-lsp bash-language-server bzl cmake-language-server                  \
                                     clangd deno dockerfile-language-server docker-compose-language-service  \
                                     gopls java-language-server json-lsp lua-language-server pyright         \
                                     rust-analyzer vim-language-server yaml-language-serve jsonls luals" +qa
 
-RUN nvim --headless +"DapInstall    bash-debug-adapter codelldb debugpy go-debug-adapter " +qa
+RUN nvim --headless +"MasonInstall  bash-debug-adapter codelldb debugpy go-debug-adapter " +qa
 
 RUN nvim --headless +"MasonInstall  asmfmt autopep8 beautysh clang-format \
                                     cmakelint commitlint cpplint gitlint gitui markdownlint prettier pylint" +qa
