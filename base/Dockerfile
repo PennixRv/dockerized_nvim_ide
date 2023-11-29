@@ -26,21 +26,21 @@ RUN pip install pynvim && gem install neovim && npm install neovim && \
     go install github.com/jesseduffield/lazygit@latest && \
     go install github.com/dundee/gdu/v5/cmd/gdu@latest
 
-RUN mkdir -p $HOME/go &&                                           \
-    echo 'export GOPATH=$HOME/go' >> $HOME/.zshrc &&               \
-    echo 'export PATH=$PATH:$GOPATH/bin' >> $HOME/.zshrc &&        \
-    echo 'export PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.zshrc &&   \
+RUN mkdir -p $HOME/go &&                                                    \
+    echo 'export GOPATH=$HOME/go' >> $HOME/.zshrc &&                        \
+    echo 'export PATH=$PATH:$GOPATH/bin' >> $HOME/.zshrc &&                 \
+    echo 'export PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.zshrc &&            \
+    echo '[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh' $HOME/.zshrc &&     \
     source $HOME/.zshrc
 
-RUN cargo install tree-sitter-cli bat bottom du-dust fd-find lsd broot ripgrep sd
+COPY .p10k.zsh $HOME
 
+RUN cargo install tree-sitter-cli bat bottom du-dust fd-find lsd broot ripgrep sd
 
 RUN git clone --depth 1 https://github.com/AstroNvim/AstroNvim ~/.config/nvim && \
     git clone https://github.com/PennixRv/astronvim_config.git ~/.config/nvim/lua/user
 
-RUN nvim --headless "+Lazy! sync" +"sleep 15" +qa
-
-RUN nvim --headless +AstroUpdatePackages +qa
+RUN nvim --headless "+Lazy! sync" +"sleep 15" +AstroUpdatePackages +qa
 
 RUN nvim --headless +"MasonInstall  asm-lsp bash-language-server bzl cmake-language-server                  \
                                     clangd deno dockerfile-language-server docker-compose-language-service  \
