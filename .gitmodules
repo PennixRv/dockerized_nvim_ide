@@ -1,0 +1,3 @@
+[submodule "base/astronvim_configuration"]
+	path = base/astronvim_configuration
+	url = https://github.com/PennixRv/astronvim_config.git
