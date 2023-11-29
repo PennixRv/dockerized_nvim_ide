@@ -34,9 +34,8 @@ RUN mkdir -p $HOME/go &&                                           \
 
 RUN cargo install tree-sitter-cli bat bottom du-dust fd-find lsd broot ripgrep sd
 
-COPY astronvim_config /tmp
-RUN git clone --depth 1 https://github.com/AstroNvim/AstroNvim ~/.config/nvim && \
-    cp -r /tmp/astronvim_config/* ~/.config/nvim/lua/user
+
+RUN git clone --depth 1 https://github.com/AstroNvim/AstroNvim ~/.config/nvim && mkdir -p ~/.config/nvim/lua/user
 
 RUN nvim --headless "+Lazy! sync" +"sleep 15" +qa
 
@@ -55,6 +54,7 @@ RUN nvim --headless +"MasonInstall  asmfmt autopep8 beautysh clang-format \
 RUN nvim --headless +"TSInstall jsonc" +qa
 
 COPY zsh-in-docker.sh /tmp
+
 RUN /tmp/zsh-in-docker.sh \
     -p git \
     -p https://github.com/zsh-users/zsh-autosuggestions \
@@ -62,7 +62,3 @@ RUN /tmp/zsh-in-docker.sh \
     -p https://github.com/zsh-users/zsh-history-substring-search \
     -p https://github.com/zsh-users/zsh-syntax-highlighting \
     -p 'history-substring-search'
-
-ENTRYPOINT [ "/bin/zsh" ]
-
-CMD ["-l"]
