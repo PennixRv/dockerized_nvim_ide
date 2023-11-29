@@ -34,8 +34,9 @@ RUN mkdir -p $HOME/go &&                                           \
 
 RUN cargo install tree-sitter-cli bat bottom du-dust fd-find lsd broot ripgrep sd
 
+COPY astronvim_config /tmp
 RUN git clone --depth 1 https://github.com/AstroNvim/AstroNvim ~/.config/nvim && \
-    git clone https://github.com/alishewn/dotFiles.git ~/.config/nvim/lua/user
+    cp -r /tmp/astronvim_config/* ~/.config/nvim/lua/user
 
 RUN nvim --headless "+Lazy! sync" +"sleep 15" +qa
 
