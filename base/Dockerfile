@@ -93,16 +93,27 @@ RUN mkdir -p $HOME/go &&                                                        
     source $HOME/.zshrc
 
 ################################################################################################
-### tmux ###
 RUN git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 RUN <<EOF cat >> $HOME/.tmux.conf
-# List of plugins
 set -g @plugin 'tmux-plugins/tpm'
 set -g @plugin 'tmux-plugins/tmux-sensible'
-set -g @plugin "janoamaral/tokyo-night-tmux"
-set -g @plugin 'laktak/extrakto'
-set -g @plugin 'Morantron/tmux-fingers'
+set -g @plugin 'catppuccin/tmux'
+
+setw -g mouse on
+
+set -g @catppuccin_window_right_separator "█ "
+set -g @catppuccin_window_number_position "right"
+set -g @catppuccin_window_middle_separator " | "
+set -g @catppuccin_window_default_fill "none"
+set -g @catppuccin_window_current_fill "all"
+set -g @catppuccin_status_modules_right "application session date_time"
+set -g @catppuccin_status_left_separator "█"
+set -g @catppuccin_status_right_separator "█"
+set -g @catppuccin_date_time_text "%Y-%m-%d %H:%M"
 
 run '~/.tmux/plugins/tpm/tpm'
 EOF
+
+RUN  $HOME/.tmux/plugins/tpm/bin/install_plugins
+################################################################################################
