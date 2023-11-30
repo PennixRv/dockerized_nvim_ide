@@ -22,7 +22,7 @@ RUN sudo dnf update -y && \
         cmake golang llvm clang-tools-extra clang bear nodejs lua           \
         ruby ruby-devel zsh neovim shadow-utils openssl fzf pip wget        \
         luarocks composer php java-devel java-openjdk-headless java-openjdk \
-        julia tmux -y
+        julia tmux xsel xclip gh gcc-c++-riscv64-linux-gnu gcc-riscv64-linux-gnu -y
 
 RUN pip install pynvim && gem install neovim && sudo npm install -g neovim
 RUN go install github.com/jesseduffield/lazygit@latest && \
@@ -65,7 +65,15 @@ RUN for n in "bash-debug-adapter" \
   do nvim --headless -c "MasonInstall ${n}" -c 'q'; done
 
 RUN for n in \
+  "diff" \
   "dockerfile" \
+  "git-rebase" \
+  "gitcommit" \
+  "gitignore" \
+  "meson" \
+  "ninja" \
+  "rust" \
+  "toml" \
   "go" \
   "java" \
   "javascript" \
@@ -76,15 +84,14 @@ RUN for n in \
   do nvim --headless -c "TSInstallSync ${n}" -c 'q'; done
 ########################################################################################################################
 ### zsh configurations
-COPY zsh-in-docker.sh /tmp
 
-RUN /tmp/zsh-in-docker.sh \
-    -p git \
-    -p https://github.com/zsh-users/zsh-autosuggestions \
-    -p https://github.com/zsh-users/zsh-completions \
-    -p https://github.com/zsh-users/zsh-history-substring-search \
-    -p https://github.com/zsh-users/zsh-syntax-highlighting \
-    -p 'history-substring-search'
+RUN sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)"  \
+    && git clone --depth=1 https://gitee.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k \
+    && git clone --depth=1 https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting \
+    && git clone --depth=1 https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions \
+    && git clone --depth=1 https://github.com/zsh-users/zsh-completions ${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions \
+    && sed -i 's#^ZSH_THEME=.*$#ZSH_THEME="powerlevel10k/powerlevel10k"#' $HOME/.zshrc \
+    && sed -i 's#^plugins=.*$#plugins=(git zsh-autosuggestions zsh-completions zsh-syntax-highlighting )#' $HOME/.zshrc
 
 COPY .p10k.zsh $HOME
 RUN mkdir -p $HOME/go
@@ -98,6 +105,8 @@ POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
 alias vim='nvim'
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 EOF
+SHELL ["/usr/bin/zsh", "-c"]
+RUN source $HOME/.zshrc
 
 ########################################################################################################################
 ### tmux configurations
@@ -140,5 +149,20 @@ windows:
       - null
       - null
 EOF
-
 ########################################################################################################################
+### github configurations
+COPY mytoken.txt .
+RUN gh auth login --with-token < mytoken.txt
+RUN <<EOF cat >> $HOME/.gitconfig
+[cola]
+        startupmode = list
+[user]
+        email = pennaliflake@gmail.com
+        name = pennix
+[credential "https://github.com"]
+        helper =
+        helper = !/usr/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+        helper =
+        helper = !/usr/bin/gh auth git-credential
+EOF
