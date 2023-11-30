@@ -33,7 +33,7 @@ RUN cargo install tree-sitter-cli bat bottom du-dust fd-find lsd broot ripgrep s
 RUN git clone --depth 1 https://github.com/AstroNvim/AstroNvim ~/.config/nvim && \
     git clone https://github.com/PennixRv/astronvim_config.git ~/.config/nvim/lua/user
 
-RUN nvim --headless "+Lazy! sync" +"sleep 15" +AstroUpdatePackages +qa
+RUN nvim --headless -c "Lazy! sync" +qa
 
 RUN for n in "asm_lsp" \
   "bashls" \
@@ -91,6 +91,7 @@ RUN mkdir -p $HOME/go
 RUN <<EOF cat >> $HOME/.zshrc
 export GOPATH=\$HOME/go
 export PATH=\$PATH:\$HOME/bin
+export PATH=\$PATH:\$HOME/.local/bin
 export PATH=\$PATH:\$GOPATH/bin
 export PATH=\$PATH:\$HOME/.cargo/bin
 POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
@@ -123,4 +124,21 @@ run '~/.tmux/plugins/tpm/tpm'
 EOF
 
 RUN  $HOME/.tmux/plugins/tpm/bin/install_plugins
+RUN pip install --user tmuxp && mkdir -p $HOME/.config/tmuxp
+RUN <<EOF cat >> $HOME/.config/tmuxp/work.yaml
+session_name: work
+windows:
+  - window_name: dev
+    layout: tiled
+    shell_command_before:
+      - cd ~/
+    panes:
+      - shell_command:
+          - cd ~
+      - shell_command:
+          - ssh pfu@10.102.11.129
+      - null
+      - null
+EOF
+
 ########################################################################################################################
