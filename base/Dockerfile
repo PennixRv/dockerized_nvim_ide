@@ -26,15 +26,6 @@ RUN pip install pynvim && gem install neovim && npm install neovim && \
     go install github.com/jesseduffield/lazygit@latest && \
     go install github.com/dundee/gdu/v5/cmd/gdu@latest
 
-RUN mkdir -p $HOME/go &&                                                    \
-    echo 'export GOPATH=$HOME/go' >> $HOME/.zshrc &&                        \
-    echo 'export PATH=$PATH:$GOPATH/bin' >> $HOME/.zshrc &&                 \
-    echo 'export PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.zshrc &&            \
-    echo '[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh' $HOME/.zshrc &&     \
-    source $HOME/.zshrc
-
-COPY .p10k.zsh $HOME
-
 RUN cargo install tree-sitter-cli bat bottom du-dust fd-find lsd broot ripgrep sd
 
 RUN git clone --depth 1 https://github.com/AstroNvim/AstroNvim ~/.config/nvim && \
@@ -42,17 +33,45 @@ RUN git clone --depth 1 https://github.com/AstroNvim/AstroNvim ~/.config/nvim &&
 
 RUN nvim --headless "+Lazy! sync" +"sleep 15" +AstroUpdatePackages +qa
 
-RUN nvim --headless +"MasonInstall  asm-lsp bash-language-server bzl cmake-language-server                  \
-                                    clangd deno dockerfile-language-server docker-compose-language-service  \
-                                    gopls java-language-server json-lsp lua-language-server pyright         \
-                                    rust-analyzer vim-language-server yaml-language-serve jsonls luals" +qa
+RUN for n in "asm_lsp" \
+  "bashls" \
+  "clangd" \
+  "cmake" \
+  "neocmake" \
+  "autotools-language-server" \
+  "denols" \
+  "dockerls" \
+  "docker_compose_language_service" \
+  "clangd" \
+  "gopls" \
+  "jsonls" \
+  "java_language_server" \
+  "julials" \
+  "lua_ls" \
+  "swift_mesonls" \
+  "pyright" \
+  "ruby_ls" \
+  "rust_analyzer" \
+  "yamlls" \
+  "yamlls"; \
+  do nvim --headless -c "LspInstall --sync ${n}" -c 'q'; done
 
-RUN nvim --headless +"MasonInstall  bash-debug-adapter codelldb debugpy go-debug-adapter " +qa
+RUN for n in "bash-debug-adapter" \
+  "codelldb" \
+  "debugpy" \
+  "cpptools"; \
+  do nvim --headless -c "MasonInstall ${n}" -c 'q'; done
 
-RUN nvim --headless +"MasonInstall  asmfmt autopep8 beautysh clang-format \
-                                    cmakelint commitlint cpplint gitlint gitui markdownlint prettier pylint" +qa
-
-RUN nvim --headless +"TSInstall jsonc" +qa
+RUN for n in \
+  "dockerfile" \
+  "go" \
+  "java" \
+  "javascript" \
+  "json" \
+  "jsonc" \
+  "kotlin" \
+  "yaml"; \
+  do nvim --headless -c "TSInstallSync ${n}" -c 'q'; done
 
 COPY zsh-in-docker.sh /tmp
 
@@ -63,3 +82,27 @@ RUN /tmp/zsh-in-docker.sh \
     -p https://github.com/zsh-users/zsh-history-substring-search \
     -p https://github.com/zsh-users/zsh-syntax-highlighting \
     -p 'history-substring-search'
+
+COPY .p10k.zsh $HOME
+RUN mkdir -p $HOME/go &&                                                        \
+    echo 'export GOPATH=$HOME/go' >> $HOME/.zshrc &&                            \
+    echo 'export PATH=$PATH:$GOPATH/bin' >> $HOME/.zshrc &&                     \
+    echo 'export PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.zshrc &&                \
+    echo '[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh' >> $HOME/.zshrc &&      \
+    echo 'POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true' >> $HOME/.zshrc &&    \
+    source $HOME/.zshrc
+
+################################################################################################
+### tmux ###
+RUN git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+
+RUN <<EOF cat >> $HOME/.tmux.conf
+# List of plugins
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin "janoamaral/tokyo-night-tmux"
+set -g @plugin 'laktak/extrakto'
+set -g @plugin 'Morantron/tmux-fingers'
+
+run '~/.tmux/plugins/tpm/tpm'
+EOF
