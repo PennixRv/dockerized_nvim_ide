@@ -15,6 +15,8 @@ WORKDIR ${APP_HOME}/${APP_USER}
 RUN chown -R ${APP_UID}:${APP_GID} ${APP_HOME}/${APP_USER}
 USER ${APP_USER}
 
+########################################################################################################################
+### nvim configurations
 RUN sudo dnf update -y && \
     sudo dnf install git rust cargo gcc gcc-c++ autoconf automake           \
         cmake golang llvm clang-tools-extra clang bear nodejs lua           \
@@ -22,8 +24,8 @@ RUN sudo dnf update -y && \
         luarocks composer php java-devel java-openjdk-headless java-openjdk \
         julia tmux -y
 
-RUN pip install pynvim && gem install neovim && npm install neovim && \
-    go install github.com/jesseduffield/lazygit@latest && \
+RUN pip install pynvim && gem install neovim && sudo npm install -g neovim
+RUN go install github.com/jesseduffield/lazygit@latest && \
     go install github.com/dundee/gdu/v5/cmd/gdu@latest
 
 RUN cargo install tree-sitter-cli bat bottom du-dust fd-find lsd broot ripgrep sd
@@ -72,7 +74,8 @@ RUN for n in \
   "kotlin" \
   "yaml"; \
   do nvim --headless -c "TSInstallSync ${n}" -c 'q'; done
-
+########################################################################################################################
+### zsh configurations
 COPY zsh-in-docker.sh /tmp
 
 RUN /tmp/zsh-in-docker.sh \
@@ -84,15 +87,19 @@ RUN /tmp/zsh-in-docker.sh \
     -p 'history-substring-search'
 
 COPY .p10k.zsh $HOME
-RUN mkdir -p $HOME/go &&                                                        \
-    echo 'export GOPATH=$HOME/go' >> $HOME/.zshrc &&                            \
-    echo 'export PATH=$PATH:$GOPATH/bin' >> $HOME/.zshrc &&                     \
-    echo 'export PATH=$PATH:$HOME/.cargo/bin' >> $HOME/.zshrc &&                \
-    echo '[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh' >> $HOME/.zshrc &&      \
-    echo 'POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true' >> $HOME/.zshrc &&    \
-    source $HOME/.zshrc
+RUN mkdir -p $HOME/go
+RUN <<EOF cat >> $HOME/.zshrc
+export GOPATH=\$HOME/go
+export PATH=\$PATH:\$HOME/bin
+export PATH=\$PATH:\$GOPATH/bin
+export PATH=\$PATH:\$HOME/.cargo/bin
+POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+alias vim='nvim'
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+EOF
 
-################################################################################################
+########################################################################################################################
+### tmux configurations
 RUN git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 
 RUN <<EOF cat >> $HOME/.tmux.conf
@@ -116,4 +123,4 @@ run '~/.tmux/plugins/tpm/tpm'
 EOF
 
 RUN  $HOME/.tmux/plugins/tpm/bin/install_plugins
-################################################################################################
+########################################################################################################################
