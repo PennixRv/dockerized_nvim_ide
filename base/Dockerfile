@@ -35,34 +35,101 @@ RUN git clone --depth 1 https://github.com/AstroNvim/AstroNvim ~/.config/nvim &&
 
 RUN nvim --headless -c "Lazy! sync" +qa
 
-RUN for n in "asm_lsp" \
+RUN for n in \
+  "arduino_language_server" \
+  "asm_lsp" \
+  "autotools_ls" \
   "bashls" \
   "clangd" \
   "cmake" \
-  "neocmake" \
-  "autotools-language-server" \
-  "denols" \
-  "dockerls" \
   "docker_compose_language_service" \
-  "clangd" \
+  "dockerls" \
   "gopls" \
-  "jsonls" \
+  "gradle_ls" \
+  "html" \
   "java_language_server" \
+  "jsonls" \
+  "jsonnet_ls" \
   "julials" \
+  "kotlin_language_server" \
   "lua_ls" \
-  "swift_mesonls" \
   "pyright" \
-  "ruby_ls" \
   "rust_analyzer" \
-  "yamlls" \
+  "sqlls" \
   "yamlls"; \
   do nvim --headless -c "LspInstall --sync ${n}" -c 'q'; done
 
-RUN for n in "bash-debug-adapter" \
+RUN for n in \
+  "bash-debug-adapter" \
   "codelldb" \
+  "cpptools" \
   "debugpy" \
-  "cpptools"; \
-  do nvim --headless -c "MasonInstall ${n}" -c 'q'; done
+  "java-debug-adapter" \
+  "go-debug-adapter" \
+  "vscode-java-decompiler"; \
+  do nvim --headless -c "DapInstall --sync ${n}" -c 'q'; done
+
+RUN for n in \
+  "cmakelang" \
+  "cmakelint" \
+  "codespell" \
+  "commitlint" \
+  "cpplint" \
+  "cspell" \
+  "gitleaks" \
+  "gitlint" \
+  "glint" \
+  "golangci-lint" \
+  "gospel" \
+  "jsonlint" \
+  "luacheck" \
+  "markdownlint" \
+  "markdownlint-cli2" \
+  "markuplint" \
+  "pydocstyle" \
+  "pyflakes" \
+  "pylama" \
+  "pylint" \
+  "shellcheck" \
+  "shellharden" \
+  "textlint" \
+  "yamllint"; \
+  do nvim --headless -c "MasonInstall --sync ${n}" -c 'q'; done
+
+RUN for n in \
+  "asmfmt" \
+  "autopep8" \
+  "clang-format" \
+  "autoflake" \
+  "beautysh" \
+  "cmakelang" \
+  "csharpier" \
+  "docformatter" \
+  "doctoc" \
+  "dprint" \
+  "fixjson" \
+  "gofumpt" \
+  "goimports" \
+  "goimports-reviser" \
+  "golines" \
+  "gomodifytags" \
+  "google-java-format" \
+  "gotests" \
+  "luaformatter" \
+  "markdown-toc" \
+  "markdownlint" \
+  "markdownlint-cli2" \
+  "mdformat" \
+  "prettier" \
+  "prettierd" \
+  "rubyfmt" \
+  "rustywind" \
+  "shfmt" \
+  "stylua" \
+  "yamlfix" \
+  "yamlfmt"; \
+  do nvim --headless -c "MasonInstall --sync ${n}" -c 'q'; done
+
 
 RUN for n in \
   "diff" \
@@ -96,14 +163,18 @@ RUN sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools
 COPY .p10k.zsh $HOME
 RUN mkdir -p $HOME/go
 RUN <<EOF cat >> $HOME/.zshrc
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+POWERLEVEL9K_DISABLE_GITSTATUS=true
+POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+
+export TERM=xterm-256color
 export GOPATH=\$HOME/go
 export PATH=\$PATH:\$HOME/bin
 export PATH=\$PATH:\$HOME/.local/bin
 export PATH=\$PATH:\$GOPATH/bin
 export PATH=\$PATH:\$HOME/.cargo/bin
-POWERLEVEL9K_DISABLE_CONFIGURATION_WIZARD=true
+
 alias vim='nvim'
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 EOF
 SHELL ["/usr/bin/zsh", "-c"]
 RUN source $HOME/.zshrc
@@ -152,7 +223,7 @@ EOF
 ########################################################################################################################
 ### github configurations
 COPY mytoken.txt .
-RUN gh auth login --with-token < mytoken.txt
+RUN echo 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 > gh_token && gh auth login -h github.com --with-token < gh_token
 RUN <<EOF cat >> $HOME/.gitconfig
 [cola]
         startupmode = list
