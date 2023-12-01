@@ -37,7 +37,7 @@ RUN nvim --headless -c "Lazy! sync" +qa
 
 RUN for n in \
   "arduino_language_server" \
-  "asm_lsp" \
+  "asm-lsp" \
   "autotools_ls" \
   "bashls" \
   "clangd" \
@@ -66,16 +66,11 @@ RUN for n in \
   "debugpy" \
   "java-debug-adapter" \
   "go-debug-adapter" \
-  "vscode-java-decompiler"; \
-  do nvim --headless -c "DapInstall --sync ${n}" -c 'q'; done
-
-RUN for n in \
+  "vscode-java-decompiler"\
   "cmakelang" \
   "cmakelint" \
-  "codespell" \
   "commitlint" \
   "cpplint" \
-  "cspell" \
   "gitleaks" \
   "gitlint" \
   "glint" \
@@ -132,6 +127,7 @@ RUN for n in \
 
 
 RUN for n in \
+  "asm" \
   "diff" \
   "dockerfile" \
   "git-rebase" \
@@ -205,25 +201,27 @@ EOF
 
 RUN  $HOME/.tmux/plugins/tpm/bin/install_plugins
 RUN pip install --user tmuxp && mkdir -p $HOME/.config/tmuxp
-RUN <<EOF cat >> $HOME/.config/tmuxp/work.yaml
-session_name: work
+RUN <<EOF cat >> $HOME/.config/tmuxp/dev.yaml
+session_name: rivai
 windows:
-  - window_name: dev
+  - window_name: dev1
     layout: tiled
-    shell_command_before:
-      - cd ~/
     panes:
-      - shell_command:
-          - cd ~
-      - shell_command:
-          - ssh pfu@10.102.11.129
-      - null
-      - null
+      - pane
+      - pane
+      - pane
+      - pane
+  - window_name: dev2
+    layout: tiled
+    panes:
+      - pane
+      - pane
+      - pane
+      - pane
 EOF
 ########################################################################################################################
 ### github configurations
-COPY mytoken.txt .
-RUN echo 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 > gh_token && gh auth login -h github.com --with-token < gh_token
+# RUN echo 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 > gh_token && gh auth login -h github.com --with-token < gh_token
 RUN <<EOF cat >> $HOME/.gitconfig
 [cola]
         startupmode = list
@@ -237,3 +235,5 @@ RUN <<EOF cat >> $HOME/.gitconfig
         helper =
         helper = !/usr/bin/gh auth git-credential
 EOF
+
+ENTRYPOINT ["/usr/bin/zsh", "-c", "nvim"]
